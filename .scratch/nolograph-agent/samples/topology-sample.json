@@ -1,0 +1,59 @@
+{
+  "report": {
+    "generated_at": "2024-06-01T08:00:00Z",
+    "site": "dc-east"
+  },
+  "devices": [
+    {
+      "id": "dev-rtr-01",
+      "hostname": "rtr-core-01",
+      "kind": "router",
+      "vendor": "Cisco",
+      "model": "NCS-5500",
+      "interfaces": [
+        { "name": "Te0/0/0", "ip": "10.0.0.1/30", "state": "up" },
+        { "name": "Te0/0/1", "ip": "10.0.1.1/30", "state": "up" }
+      ]
+    },
+    {
+      "id": "dev-sw-02",
+      "hostname": "sw-dist-02",
+      "kind": "switch",
+      "vendor": "Arista",
+      "model": "7050X3",
+      "interfaces": [
+        { "name": "Eth1/1", "ip": "10.0.0.2/30", "state": "up" },
+        { "name": "Eth1/2", "ip": null, "state": "down" }
+      ]
+    },
+    {
+      "id": "dev-fw-03",
+      "hostname": "fw-edge-03",
+      "kind": "firewall",
+      "vendor": "Palo Alto",
+      "model": "PA-3260"
+    }
+  ],
+  "networks": [
+    { "id": "net-10.0.0.0-30", "cidr": "10.0.0.0/30", "name": "backbone-e1" },
+    { "id": "net-10.0.1.0-30", "cidr": "10.0.1.0/30", "name": "backbone-e2" }
+  ],
+  "links": [
+    {
+      "a": "dev-rtr-01",
+      "a_if": "Te0/0/0",
+      "z": "dev-sw-02",
+      "z_if": "Eth1/1",
+      "speed": "10G",
+      "type": "fiber"
+    },
+    {
+      "a": "dev-rtr-01",
+      "a_if": "Te0/0/1",
+      "z": "dev-fw-03",
+      "z_if": "Eth1/0",
+      "speed": "1G",
+      "type": "copper"
+    }
+  ]
+}

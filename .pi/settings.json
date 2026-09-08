@@ -1,0 +1,28 @@
+{
+  "packages": [
+    {
+      "source": "npm:@zosmaai/pi-llm-wiki",
+      "autoload": false,
+      "extensions": [
+        "-extensions/llm-wiki/index.ts"
+      ],
+      "skills": [
+        "-skills/llm-wiki/SKILL.md"
+      ],
+      "prompts": [
+        "-prompts/wiki-digest.md",
+        "-prompts/wiki-discover.md",
+        "-prompts/wiki-ingest.md",
+        "-prompts/wiki-init.md",
+        "-prompts/wiki-query.md",
+        "-prompts/wiki-lint.md",
+        "-prompts/wiki-record.md",
+        "-prompts/wiki-req.md",
+        "-prompts/wiki-retro.md",
+        "-prompts/wiki-run.md",
+        "-prompts/wiki-skills.md",
+        "-prompts/wiki-status.md"
+      ]
+    }
+  ]
+}
