@@ -90,13 +90,21 @@ def _ingest(json_path: str, *, agent_mode: bool, dry_run: bool) -> dict[str, Any
             for v in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"):
                 if not os.environ.get(v):
                     return {"error": {"code": "bad_args", "message": f"{v} not set"}}
+            # capture the actual write result so the report shows real merge counts
+            commit_res: dict[str, Any] = {}
+
+            def commit(**_: Any) -> dict[str, Any]:
+                res = tools.commit_batch(driver, model, clean["nodes"], clean["edges"])
+                commit_res.update(res)
+                return res
+
             registry = {
                 "map_document": lambda **_: map_document(model, doc),
                 "sync_schema": lambda **_: tools.sync_schema(driver, model),
-                "commit_batch": lambda **_: tools.commit_batch(driver, model, clean["nodes"], clean["edges"]),
+                "commit_batch": commit,
             }
             out = run_agent(_client(), os.environ["LLM_MODEL"], _AGENT_SYSTEM, str(doc), TOOL_DEFS, registry)
-            return {"agent": out, **_report(clean, model)}
+            return {"agent": out, **_report(clean, model, commit_res or None)}
         sync = tools.sync_schema(driver, model)
         if "error" in sync:
             return sync
