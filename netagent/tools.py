@@ -17,7 +17,8 @@ def err(code: str, message: str, detail: Any = None) -> dict[str, Any]:
 
 def _run_write(driver, fn) -> Any:
     """Execute fn(tx)->result inside one write transaction; rollback on any failure."""
-    return driver.execute_write(fn)
+    with driver.session() as session:
+        return session.execute_write(fn)
 
 
 def sync_schema(driver, model: Model) -> dict[str, Any]:
@@ -49,7 +50,7 @@ def commit_batch(driver, model: Model, nodes: list[dict], edges: list[dict]) -> 
                 t = model.node_type(tname)
                 if not t:
                     continue
-                tx.run(f"UNWIND $rows AS r MERGE (n:{t.name} {{{t.key_field}: r.key}}) ON CREATE SET n += r.props", rows=rows)
+                tx.run(f"UNWIND $rows AS r MERGE (n:{t.name} {{{t.key_field}: r.key}}) ON CREATE SET n += r.properties", rows=rows)
                 merged_nodes += len(rows)
             merged_edges = 0
             for e in edges:
@@ -72,7 +73,7 @@ def commit_batch(driver, model: Model, nodes: list[dict], edges: list[dict]) -> 
                     f"UNWIND $rows AS e "
                     f"MATCH (a:{e['source_type']} {{{sk_f}: e.source_key}}) "
                     f"MATCH (b:{e['target_type']} {{{tk_f}: e.target_key}}) "
-                    f"MERGE (a)-[r:{e['edge_type']}]->(b) ON CREATE SET r += e.props",
+                    f"MERGE (a)-[r:{e['edge_type']}]->(b) ON CREATE SET r += e.properties",
                     rows=[e],
                 )
                 merged_edges += 1
@@ -130,7 +131,8 @@ def match(driver, label: str, key: Any = None) -> dict[str, Any]:
                 return list(tx.run(f"MATCH (n:{label}) RETURN n"))
             return list(tx.run(f"MATCH (n:{label} {{key: $key}}) RETURN n", key=key))
 
-        records = driver.execute_read(read)
+        with driver.session() as session:
+            records = session.execute_read(read)
         return {"ok": True, "records": [dict(r["n"]) for r in records]}
     except Exception as e:  # noqa: BLE001
         return err("bad_args", "match failed", e)

@@ -122,6 +122,15 @@ class FakeDriver:
         self.write_calls = 0
         self.read_calls = 0
 
+    def session(self):
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
     def execute_write(self, fn):
         self.write_calls += 1
         return fn(self.tx)

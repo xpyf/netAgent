@@ -5,6 +5,7 @@ valid items are still written atomically; skipped items only get logged.
 """
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from netagent.model import Model
@@ -40,7 +41,12 @@ def _coerce(attr_type: str, val: Any) -> tuple[Any, bool]:
             return val.lower() == "true", True
         return None, False
     if attr_type == "json":
-        return val, True
+        # neo4j properties are primitives or arrays of primitives, not maps/lists of maps:
+        # serialize nested json to a JSON string (round-trippable) so rule-B "nested as attribute"
+        # is storable.
+        if isinstance(val, (dict, list)):
+            return json.dumps(val, ensure_ascii=False), True
+        return str(val), True
     return None, False
 
 
